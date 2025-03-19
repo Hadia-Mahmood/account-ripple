@@ -4,9 +4,10 @@ import { Link } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useUserContext } from '@/context/UserContext';
+import { Briefcase } from 'lucide-react';
 
 const Header = () => {
-  const { user } = useUserContext();
+  const { user, isContractor } = useUserContext();
   
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass-morphism border-b border-gray-200/50 px-6 py-3">
@@ -38,12 +39,19 @@ const Header = () => {
               to="/account" 
               className="flex items-center space-x-2 py-1.5 px-3 rounded-full hover:bg-gray-100 transition-colors"
             >
-              <Avatar className="h-8 w-8 ring-2 ring-primary/10">
-                <AvatarImage src={user.profilePicture} alt={user.firstName} />
-                <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                  {user.firstName?.[0]}{user.lastName?.[0]}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="h-8 w-8 ring-2 ring-primary/10">
+                  <AvatarImage src={user.profilePicture} alt={user.firstName} />
+                  <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                    {user.firstName?.[0]}{user.lastName?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                {isContractor && (
+                  <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-0.5">
+                    <Briefcase className="h-3 w-3" />
+                  </div>
+                )}
+              </div>
               <span className="text-sm font-medium">My Account</span>
             </Link>
           ) : (

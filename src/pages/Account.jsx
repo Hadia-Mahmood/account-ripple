@@ -8,12 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Camera, Shield, User, Phone, Mail, Key } from 'lucide-react';
+import { Briefcase, Camera, Shield, User, Phone, Mail, Key, MapPin } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import ContractorReviews from '../components/ContractorReviews';
+import ServiceLocations from '../components/ServiceLocations';
 
 const Account = () => {
-  const { user, loading, updateUserProfile, updatePassword } = useUserContext();
+  const { user, loading, updateUserProfile, updatePassword, updateContractorInfo, isContractor, toggleUserType } = useUserContext();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [passwordData, setPasswordData] = useState({
@@ -31,10 +33,15 @@ const Account = () => {
         firstName: user.firstName,
         lastName: user.lastName,
         contactNumber: user.contactNumber,
-        profilePicture: user.profilePicture
+        profilePicture: user.profilePicture,
+        ...(isContractor && {
+          companyName: user.companyName,
+          state: user.state,
+          serviceCities: user.serviceCities
+        })
       });
     }
-  }, [user]);
+  }, [user, isContractor]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -76,7 +83,12 @@ const Account = () => {
         firstName: user.firstName,
         lastName: user.lastName,
         contactNumber: user.contactNumber,
-        profilePicture: user.profilePicture
+        profilePicture: user.profilePicture,
+        ...(isContractor && {
+          companyName: user.companyName,
+          state: user.state,
+          serviceCities: user.serviceCities
+        })
       });
     }
     setIsEditing(false);
@@ -156,6 +168,24 @@ const Account = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleServiceLocationsUpdate = (locationData) => {
+    setFormData(prev => ({
+      ...prev,
+      state: locationData.state,
+      serviceCities: locationData.serviceCities
+    }));
+    
+    if (!isEditing) {
+      // If we're updating directly from the ServiceLocations component
+      updateContractorInfo(locationData);
+    }
+  };
+
+  // For demo purposes - toggle between user and contractor views
+  const handleToggleUserType = () => {
+    toggleUserType();
+  };
+
   if (loading && !user) {
     return (
       <div className="container max-w-4xl py-10 animate-fade-in">
@@ -186,11 +216,18 @@ const Account = () => {
   return (
     <div className="container max-w-4xl py-10 animate-fade-in">
       <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-medium tracking-tight">Account</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage your account settings and profile information
-          </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-medium tracking-tight">Account</h1>
+            <p className="text-muted-foreground mt-2">
+              Manage your account settings and profile information
+            </p>
+          </div>
+          
+          {/* For demo purposes only - toggle between user and contractor */}
+          <Button onClick={handleToggleUserType} variant="outline">
+            Switch to {isContractor ? 'User' : 'Contractor'} View
+          </Button>
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
@@ -263,6 +300,9 @@ const Account = () => {
                         `${user.firstName} ${user.lastName}`
                       )}
                     </h2>
+                    {isContractor && (
+                      <p className="text-blue-600 font-medium mt-1">Contractor</p>
+                    )}
                   </div>
                   
                   <div>
@@ -344,6 +384,42 @@ const Account = () => {
                       )}
                     </div>
                   </div>
+
+                  {/* Contractor-specific fields */}
+                  {isContractor && (
+                    <>
+                      <div className="pt-4 border-t border-gray-100">
+                        <h3 className="text-lg font-medium mb-4">Contractor Information</h3>
+                        
+                        <div className="space-y-2 mb-6">
+                          <div className="flex items-center text-sm text-muted-foreground mb-1">
+                            <Briefcase className="mr-2 h-4 w-4" />
+                            Company Name
+                          </div>
+                          {isEditing ? (
+                            <Input 
+                              name="companyName" 
+                              value={formData.companyName} 
+                              onChange={handleInputChange} 
+                            />
+                          ) : (
+                            <div className="font-medium">{user.companyName}</div>
+                          )}
+                        </div>
+                        
+                        <ServiceLocations
+                          state={formData.state || user.state}
+                          serviceCities={formData.serviceCities || user.serviceCities}
+                          isEditing={isEditing}
+                          onSave={handleServiceLocationsUpdate}
+                        />
+                      </div>
+                      
+                      <div className="pt-6">
+                        <ContractorReviews reviews={user.reviews} />
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
