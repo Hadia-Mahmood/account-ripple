@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Briefcase, Camera, Shield, User, Phone, Mail, Key, MapPin } from 'lucide-react';
+import { Briefcase, Camera, Shield, User, Phone, Mail, Key, MapPin, Star } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import ContractorReviews from '../components/ContractorReviews';
@@ -231,13 +231,21 @@ const Account = () => {
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsList className={`grid w-full ${isContractor ? 'grid-cols-3' : 'grid-cols-2'} mb-8`}>
             <TabsTrigger value="profile" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Profile
             </TabsTrigger>
             <TabsTrigger value="security" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               Security
             </TabsTrigger>
+            {isContractor && (
+              <TabsTrigger value="reviews" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <div className="flex items-center gap-1">
+                  <Star className="h-4 w-4" />
+                  <span>Reviews</span>
+                </div>
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="profile" className="animate-slide-up">
@@ -387,38 +395,32 @@ const Account = () => {
 
                   {/* Contractor-specific fields */}
                   {isContractor && (
-                    <>
-                      <div className="pt-4 border-t border-gray-100">
-                        <h3 className="text-lg font-medium mb-4">Contractor Information</h3>
-                        
-                        <div className="space-y-2 mb-6">
-                          <div className="flex items-center text-sm text-muted-foreground mb-1">
-                            <Briefcase className="mr-2 h-4 w-4" />
-                            Company Name
-                          </div>
-                          {isEditing ? (
-                            <Input 
-                              name="companyName" 
-                              value={formData.companyName} 
-                              onChange={handleInputChange} 
-                            />
-                          ) : (
-                            <div className="font-medium">{user.companyName}</div>
-                          )}
+                    <div className="pt-4 border-t border-gray-100">
+                      <h3 className="text-lg font-medium mb-4">Contractor Information</h3>
+                      
+                      <div className="space-y-2 mb-6">
+                        <div className="flex items-center text-sm text-muted-foreground mb-1">
+                          <Briefcase className="mr-2 h-4 w-4" />
+                          Company Name
                         </div>
-                        
-                        <ServiceLocations
-                          state={formData.state || user.state}
-                          serviceCities={formData.serviceCities || user.serviceCities}
-                          isEditing={isEditing}
-                          onSave={handleServiceLocationsUpdate}
-                        />
+                        {isEditing ? (
+                          <Input 
+                            name="companyName" 
+                            value={formData.companyName} 
+                            onChange={handleInputChange} 
+                          />
+                        ) : (
+                          <div className="font-medium">{user.companyName}</div>
+                        )}
                       </div>
                       
-                      <div className="pt-6">
-                        <ContractorReviews reviews={user.reviews} />
-                      </div>
-                    </>
+                      <ServiceLocations
+                        state={formData.state || user.state}
+                        serviceCities={formData.serviceCities || user.serviceCities}
+                        isEditing={isEditing}
+                        onSave={handleServiceLocationsUpdate}
+                      />
+                    </div>
                   )}
                 </div>
               </CardContent>
@@ -534,6 +536,27 @@ const Account = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* New Reviews Tab - only visible for contractors */}
+          {isContractor && (
+            <TabsContent value="reviews" className="animate-slide-up">
+              <Card className="border-none shadow-md bg-white">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Star className="h-5 w-5 text-yellow-400" />
+                    Customer Reviews
+                  </CardTitle>
+                  <CardDescription>
+                    View and manage reviews from your customers
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent>
+                  <ContractorReviews reviews={user.reviews} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
