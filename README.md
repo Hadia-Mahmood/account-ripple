@@ -1,5 +1,4 @@
 # Welcome 
-espace and commit and push your changes once you're done.
 
 ## What technologies are used for this project?
 
